@@ -8,6 +8,7 @@ import '../widgets/custom_date_picker.dart';
 import '../widgets/custom_dropdown.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_todate_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class AddEditEmployeePage extends StatefulWidget {
   final Employee? employee;
@@ -35,6 +36,26 @@ class _AddEditEmployeePageState extends State<AddEditEmployeePage> {
   }
 
   void _pickFromDate() {
+    //if ites open on web show a date picker dialog
+    if(kIsWeb){
+      showDatePicker(
+        context: context,
+        initialDate: _fromDate ?? DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+      ).then((date) {
+        if (date != null) {
+          setState(() {
+            _fromDate = date;
+            if (_toDate != null && _toDate!.isBefore(_fromDate!)) {
+              _toDate = null;
+            }
+          });
+        }
+      });
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => CustomDatePicker(
@@ -52,6 +73,27 @@ class _AddEditEmployeePageState extends State<AddEditEmployeePage> {
   }
 
   void _pickToDate() {
+    //if ites open on web show a date picker dialog
+    if(kIsWeb){
+      showDatePicker(
+        context: context,
+        initialDate: _toDate ?? _fromDate ?? DateTime.now(),
+        firstDate: _fromDate ?? DateTime.now(),
+        lastDate: DateTime(2100),
+      ).then((date) {
+        if (date != null) {
+          if (_fromDate != null && date.isBefore(_fromDate!)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("To Date can't be before From Date")),
+            );
+          } else {
+            setState(() => _toDate = date);
+          }
+        }
+      });
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => CustomTODatePicker(

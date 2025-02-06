@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:sembast_web/sembast_web.dart';
 import 'package:path_provider/path_provider.dart';
 import '../config/constants.dart';
 import '../models/employee_model.dart';
@@ -19,10 +21,23 @@ class LocalDB {
     return _database!;
   }
 
+  // Future<void> initDB() async {
+  //   final dir = await getApplicationDocumentsDirectory();
+  //   final dbPath = "${dir.path}/${AppConstants.dbName}";
+  //   _database = await databaseFactoryIo.openDatabase(dbPath);
+  // }
+
+   /// Initialize DB based on platform
   Future<void> initDB() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final dbPath = "${dir.path}/${AppConstants.dbName}";
-    _database = await databaseFactoryIo.openDatabase(dbPath);
+    if (kIsWeb) {
+      // Web Database Initialization
+      _database = await databaseFactoryWeb.openDatabase(AppConstants.dbName);
+    } else {
+      // Mobile/Desktop Database Initialization
+      final dir = await getApplicationDocumentsDirectory();
+      final dbPath = "${dir.path}/${AppConstants.dbName}";
+      _database = await databaseFactoryIo.openDatabase(dbPath);
+    }
   }
 
   Future<void> addEmployee(Employee employee) async {
